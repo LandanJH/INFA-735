@@ -60,8 +60,8 @@ startTMUX () { # Starts all of the different tmux sessions
 
 startNXC () { #eventually need to change to NetExec
     echo -e "${YELLOW}  Starting NetExec SMB Scan... ${NC}"
-    tmux send-keys -t nxc "nxc smb $new_ip >> ./"$1"/Scans/cme.results" ENTER #starts the cme scan
-    tmux send-keys -t extra "nxc smb $new_ip --gen-relay-list ~/"$1"/Scans/targets.txt" ENTER #might not work tbd
+    tmux send-keys -t nxc "nxc smb $new_ip >> ./"$1"/scans/cme.results" ENTER #starts the cme scan
+    tmux send-keys -t extra "nxc smb $new_ip --gen-relay-list ~/"$1"/scans/targets.txt" ENTER #might not work tbd
 }
 
 startNMAP () { # I bet you wouldn't guess that this function is supposed to start the nmap scans huh
@@ -78,17 +78,31 @@ startMASS () {
 
 nmaphelp () { # function that will create helper scripts for common findings
     echo -e "${YELLOW}  Creating helper scripts for FTP and Telnet... ${NC}"
-    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 21 --open -scripts ftp-anon -oN ftp_anon" >> ~/"$1"/Scans/FTPANON.sh
+    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 21 --open -scripts ftp-anon -oN ftp_anon" >> ~/"$1"/scans/FTPANON.sh
     chmod +x ./$1/Scans/FTPANON.sh
-    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 23 --open -oN telnet" >> ~/"$1"/Scans/TELNET.sh
+    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 23 --open -oN telnet" >> ~/"$1"/scans/TELNET.sh
     chmod +x ./$1/Scans/TELNET.sh
+}
+
+finished () { # I wonder what this could possibly be
+    echo -e "${GREEN} \n${NC}"
+    echo -e "${GREEN}  .dBBBBP   dBBBP dBBBBBBP dBP dBP dBBBBBb     dBBBP  dBBBBP dBBBBBBb dBBBBBb  dBP    dBBBP dBBBBBBP dBBBP ${NC}"
+    echo -e "${GREEN}  BP                                   dB'           dBP.BP       dBP     dB' ${NC}"
+    echo -e "${GREEN}   BBBBb  dBBP     dBP   dBP dBP   dBBBP'    dBP    dBP.BP dBPdBPdBP  dBBBP' dBP    dBBP     dBP   dBBP ${NC}"
+    echo -e "${GREEN}     dBP dBP      dBP   dBP_dBP   dBP       dBP    dBP.BP dBPdBPdBP  dBP    dBP    dBP      dBP   dBP ${NC}"
+    echo -e "${GREEN}dBBBBP' dBBBBP   dBP   dBBBBBP   dBP       dBBBBP dBBBBP dBPdBPdBP  dBP    dBBBBP dBBBBP   dBP   dBBBBP \n${NC}"
+    echo -e "${YELLOW}[!] Reminder you will have to close the nmap tmux session${NC}"
+}
+
+alert () {
+    curl -d "Scanning is complete" <url for ntfy>
 }
 
 program () { # basically just main
     if [ "$1" == "-h" ] || [ "$1" == "help" ] || ["$1" == ""]; then
         echo -e "${BLUE}Displaying help information...${NC}"
         echo -e "${BLUE}  Usage: $0 <directory_name> \n${NC}"
-        echo -e "${YELLOW}  [!] This is a script to automate the acannign process${NC}"
+        echo -e "${YELLOW}  [!] This is a script to automate the scannign process${NC}"
         exit 0
     else
         # maybe add a prompt that will ask the user if they want to add any other arguments before running
@@ -100,6 +114,7 @@ program () { # basically just main
         startMASSCAN
         startNMAP "$1"
         nmaphelp "$1"
+        alert
         finished
     fi
 }
