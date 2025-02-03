@@ -1,4 +1,5 @@
 #!/bin/bash
+source ./.env
 
 # Name: scan1.sh.sh
 # Author: Landan
@@ -12,7 +13,7 @@ BLUE='\033[0;34m'
 # Reset the text color to default
 NC='\033[0m'
 
-PASS="" #root password for scans
+#PASS="" #root password for scans
 
 makeParentDirectory () { # making the file structure
     # Check if an argument is provided
@@ -20,8 +21,6 @@ makeParentDirectory () { # making the file structure
         mkdir "$1"
         pwd
         echo "Parent Dir :: $1"
-        echo -e "${YELLOW}  Making Responder Directory ${NC}"
-        mkdir "$1"/responder #directory for responer
         echo -e "${YELLOW}  Making scans Directory ${NC}"
         mkdir "$1"/scans
         echo -e "${YELLOW}  Making Resources Directory ${NC}"
@@ -34,7 +33,7 @@ makeParentDirectory () { # making the file structure
 
 grabIP () { #Getting the ip information
     # grab the ip schema of the network
-    your_ip=$(ifconfig eth0 | grep -oP 'inet \K[\d.]+')
+    your_ip=$(ifconfig $ADAPTER | grep -oG '\b[0-9]\{1,3\}\(\.[0-9]\{1,3\}\)\{3\}\b' | head -n 1)
     echo -e "${YELLOW}  Your public IP address is: $your_ip${NC}"
 
     # Extract the first three octets of the IP address
@@ -78,10 +77,10 @@ startMASS () {
 
 nmaphelp () { # function that will create helper scripts for common findings
     echo -e "${YELLOW}  Creating helper scripts for FTP and Telnet... ${NC}"
-    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 21 --open -scripts ftp-anon -oN ftp_anon" >> ~/"$1"/scans/FTPANON.sh
-    chmod +x ./$1/Scans/FTPANON.sh
-    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 23 --open -oN telnet" >> ~/"$1"/scans/TELNET.sh
-    chmod +x ./$1/Scans/TELNET.sh
+    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 21 --open -scripts ftp-anon -oN ftp_anon" >> ./"$1"/scans/FTPANON.sh
+    chmod +x ./$1/scans/FTPANON.sh
+    echo -e "#!/bin/bash\nnmap $new_ip -sT -sV -p 23 --open -oN telnet" >> ./"$1"/scans/TELNET.sh
+    chmod +x ./$1/scans/TELNET.sh
 }
 
 finished () { # I wonder what this could possibly be
@@ -95,7 +94,7 @@ finished () { # I wonder what this could possibly be
 }
 
 alert () {
-    curl -d "Scanning is complete" <url for ntfy>
+    curl -d "Scanning is complete" $NTFY
 }
 
 program () { # basically just main
