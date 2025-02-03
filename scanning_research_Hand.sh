@@ -1,7 +1,7 @@
 #!/bin/bash
 source ./.env
 
-# Name: scan1.sh.sh
+# Name: scanning_research_Hand.sh
 # Author: Landan
 # Purpose: Script to automate the scanning process
 
